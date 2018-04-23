@@ -1,0 +1,50 @@
+<!--TRACE-->
+<configuration status="INFO" monitorInterval="10" >
+    <properties>
+        <property name="LOG_HOME">.</property>
+    </properties>
+    <appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n"/>
+        </Console>
+        <RollingFile name="DATA-LOG"
+                     filePattern="./data-logs/$${date:yyyy-MM}/data_%d{yyyyMMddHH}.log">
+            <!--<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>-->
+            <PatternLayout pattern="%m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <!--<SizeBasedTriggeringPolicy size="100 MB"/>-->
+            </Policies>
+            <DirectWriteRolloverStrategy>
+                <Delete basePath="./data-logs/" maxDepth="2">
+                    <IfFileName glob="*/data_*.log" />
+                    <IfLastModified age="6M"/>
+                </Delete>
+            </DirectWriteRolloverStrategy>
+        </RollingFile>
+        <RollingFile name="RUN-LOG"
+                     filePattern="./run-logs/$${date:yyyy-MM}/run_%d{yyyyMMddHH}.log">
+            <!--<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>-->
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <!--<SizeBasedTriggeringPolicy size="100 MB"/>-->
+            </Policies>
+            <DirectWriteRolloverStrategy>
+                <Delete basePath="./run-logs/" maxDepth="2">
+                    <IfFileName glob="*/run_*.log" />
+                    <IfLastModified age="6M"/>
+                </Delete>
+            </DirectWriteRolloverStrategy>
+        </RollingFile>
+    </appenders>
+    <loggers>
+        <Logger name="DATA" level="info" additivity="false">
+            <AppenderRef ref="DATA-LOG"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="RUN-LOG"/>
+        </Root>
+    </loggers>
+</configuration>
