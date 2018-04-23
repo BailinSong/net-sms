@@ -1,13 +1,12 @@
 package com.blueline.net.sms.manager;
 
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Lihuanghe(18852780@qq.com) 系统连接的统一管理器，负责连接服务端，或者开启监听端口，等客户端连接 。
@@ -21,6 +20,17 @@ public enum EndpointManager implements EndpointManagerInterface {
 	private ConcurrentHashMap<String, EndpointEntity> idMap = new ConcurrentHashMap<String, EndpointEntity>();
 
 	private ConcurrentHashMap<String, EndpointConnector<?>> map = new ConcurrentHashMap<String, EndpointConnector<?>>();
+
+	private Timer timer=new Timer("EndpointManager reconnect",true);
+
+	private EndpointManager(){
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				reOpen();
+			}
+		},30000,30000 );
+	}
 
 	public synchronized void openEndpoint(EndpointEntity entity) {
 		if (!entity.isValid())
@@ -73,6 +83,20 @@ public enum EndpointManager implements EndpointManagerInterface {
 	public void openAll() throws Exception {
 		for (EndpointEntity e : endpoints)
 			openEndpoint(e);
+	}
+
+	private void reOpen(){
+		for (EndpointEntity e : endpoints){
+			if(e instanceof ClientEndpoint){
+				if(map.get(e.getId()).getConnectionNum()==0) {
+					try {
+						map.get(e.getId()).open();
+					} catch (Exception e1) {
+						logger.error("re open Error", e);
+					}
+				}
+			}
+		}
 	}
 
 	public synchronized void addEndpointEntity(EndpointEntity entity) {

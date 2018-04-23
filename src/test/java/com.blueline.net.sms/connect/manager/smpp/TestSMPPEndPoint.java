@@ -95,7 +95,7 @@ public class TestSMPPEndPoint {
 		//LockSupport.park();
 		 MBeanServer mserver = ManagementFactory.getPlatformMBeanServer();  
 
-        ObjectName stat = new ObjectName("com.zx.sms:name=ConnState");
+        ObjectName stat = new ObjectName("com.blueline.net.sms:name=ConnState");
         mserver.registerMBean(new ConnState(), stat);
         System.out.println("start.....");
         

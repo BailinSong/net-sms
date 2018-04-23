@@ -1,5 +1,6 @@
 package com.blueline.net.sms.connect.manager.cmpp;
 
+import com.blueline.net.sms.handler.api.AbstractBusinessHandler;
 import com.blueline.net.sms.handler.api.BusinessHandlerInterface;
 import com.blueline.net.sms.handler.api.gate.SessionConnectedHandler;
 import com.blueline.net.sms.handler.api.smsbiz.MessageReceiveHandler;
@@ -58,12 +59,12 @@ public class TestCMPPEndPoint {
 		child.setValid(true);
 		child.setVersion((short)0x20);
 
-		child.setMaxChannels((short)20);
+//		child.setMaxChannels((short)20);
 		child.setRetryWaitTimeSec((short)30);
-		child.setMaxRetryCnt((short)3);
-		child.setReSendFailMsg(true);
-		child.setWriteLimit(200);
-		child.setReadLimit(200);
+//		child.setMaxRetryCnt((short)3);
+		child.setReSendFailMsg(false);
+//		child.setWriteLimit(200);
+//		child.setReadLimit(200);
 		List<BusinessHandlerInterface> serverhandlers = new ArrayList<BusinessHandlerInterface>();
 		serverhandlers.add(new SessionConnectedHandler(new AtomicInteger(300000)));
 		child.setBusinessHandlerSet(serverhandlers);
@@ -81,7 +82,7 @@ public class TestCMPPEndPoint {
 		client.setPassword("ICP");
 
 
-		client.setMaxChannels((short)12);
+//		client.setMaxChannels((short)12);
 		client.setVersion((short)0x20);
 		client.setRetryWaitTimeSec((short)10);
 		client.setUseSSL(false);
@@ -89,6 +90,13 @@ public class TestCMPPEndPoint {
 
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		clienthandlers.add( new MessageReceiveHandler());
+		clienthandlers.add(new AbstractBusinessHandler() {
+			@Override
+			public String name() {
+				return "Auto reconnect-smsBiz";
+			}
+
+		});
 		client.setBusinessHandlerSet(clienthandlers);
 
 		manager.addEndpointEntity(client);
@@ -97,7 +105,7 @@ public class TestCMPPEndPoint {
 		//
 		 MBeanServer mserver = ManagementFactory.getPlatformMBeanServer();  
 
-        ObjectName stat = new ObjectName("com.zx.sms:name=ConnState");
+        ObjectName stat = new ObjectName("com.blueline.net.sms:name=ConnState");
         mserver.registerMBean(new ConnState(), stat);
         System.out.println("start.....");
         
